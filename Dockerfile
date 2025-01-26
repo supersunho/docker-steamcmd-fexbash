@@ -32,7 +32,7 @@ y
 1
 y
 EOF
-RUN rm -rf /home/steam/.fex-emu/RootFS/Ubuntu_22_04.sqsh
+RUN rm -rf /home/steam/.fex-emu/RootFS/Ubuntu_24_04.sqsh
 
 WORKDIR /home/steam/steamcmd
 RUN curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf - \
