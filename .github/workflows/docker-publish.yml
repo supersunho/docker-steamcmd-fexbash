@@ -17,7 +17,14 @@ env:
 
 jobs:
     build:
-        runs-on: ubuntu-latest
+          strategy:
+            matrix:
+                os: [self-hosted]
+                # os: [self-hosted] # self-hosted는 ARM64용으로 설정
+                # os: [ubuntu-latest, self-hosted] 
+                # arch: [aarch64-linux-gnu]
+                # arch: [x86_64-linux-gnu, aarch64-linux-gnu]
+        runs-on: ${{ matrix.os }}
         permissions:
             contents: read
             packages: write
