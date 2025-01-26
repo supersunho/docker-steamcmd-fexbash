@@ -41,4 +41,4 @@ RUN curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.t
  && ln -sf ../../steamcmd/linux64/steamclient.so ~/.steam/sdk64/
  
 WORKDIR /home/steam/
-# USER root
+USER root
