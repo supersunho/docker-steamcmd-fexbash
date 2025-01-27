@@ -1,4 +1,4 @@
-FROM ghcr.io/supersunho/docker-steamcmd-fexbash-base:1.0.0-arm64 AS FEXBuilder
+FROM ghcr.io/supersunho/docker-steamcmd-fexbash-base:1.0.0-arm64 AS fexbuilder
 
 ENV DEBIAN_FRONTEND=noninteractive 
 
@@ -20,7 +20,14 @@ RUN sudo ninja && \
 
 FROM ubuntu:24.04
 
-COPY --from=FEXBuilder /shk/FEX/Build/Bin/* /usr/bin/
+COPY --from=fexbuilder /shk/FEX/Build/Bin/* /usr/bin/
+RUN apt update && apt-get install -y \
+    sudo curl squashfs-tools
+
+# Clean up
+RUN apt-get clean \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
 
 RUN useradd -m -s /bin/bash steam \ 
     && usermod -aG sudo steam \ 
