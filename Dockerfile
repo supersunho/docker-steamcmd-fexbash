@@ -1,13 +1,7 @@
-FROM ghcr.io/supersunho/docker-steamcmd-fexbash-base:1.0.0-arm64
+FROM ghcr.io/supersunho/docker-steamcmd-fexbash-base:1.0.0-arm64 AS FEXBuilder
 
 ENV DEBIAN_FRONTEND=noninteractive 
- 
-RUN useradd -m -s /bin/bash steam \ 
-    && usermod -aG sudo steam \ 
-    && echo 'root:shk' | chpasswd \
-    && echo "steam ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/steam
 
-USER steam
 WORKDIR /shk
 
 # Clone the FEX repository and build it
@@ -24,7 +18,17 @@ RUN sudo ninja && \
     # sudo ninja binfmt_misc_32 && \
     # sudo ninja binfmt_misc_64
 
-WORKDIR /home/steam/.fex-emu/RootFS 
+FROM ubuntu:24.04
+
+COPY --from=FEXBuilder /shk/FEX/Build/Bin/* /usr/bin/
+
+RUN useradd -m -s /bin/bash steam \ 
+    && usermod -aG sudo steam \ 
+    && echo 'root:shk' | chpasswd \
+    && echo "steam ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/steam
+
+USER steam
+# WORKDIR /home/steam/.fex-emu/RootFS 
 RUN /usr/bin/FEXRootFSFetcher <<EOF
 y
 y
@@ -35,10 +39,11 @@ EOF
 RUN rm -rf /home/steam/.fex-emu/RootFS/Ubuntu_24_04.sqsh
 
 WORKDIR /home/steam/steamcmd
-RUN curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf - \
- && FEXBash -c "/home/steam/steamcmd/steamcmd.sh +quit" \
- && mkdir -p ~/.steam/sdk64/ \
- && ln -sf ../../steamcmd/linux64/steamclient.so ~/.steam/sdk64/
+RUN curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" -o "steamcmd_linux.tar.gz" \
+    && tar zxvf steamcmd_linux.tar.gz \
+    && FEXBash -c "/home/steam/steamcmd/steamcmd.sh +quit" \
+    && mkdir -p ~/.steam/sdk64/ \
+    && ln -sf ../../steamcmd/linux64/steamclient.so ~/.steam/sdk64/
  
 WORKDIR /home/steam/
 USER root
